@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="insert-cars" author="ivan">
+        <insert tableName="cars">
+            <column name="plate_number" value="1234 AB-7"/>
+            <column name="color" value="Black"/>
+            <column name="brand" value="Volkswagen"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+
+        <insert tableName="cars">
+            <column name="plate_number" value="5678 CD-5"/>
+            <column name="color" value="White"/>
+            <column name="brand" value="Toyota"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-drivers" author="ivan">
+        <insert tableName="drivers">
+            <column name="name" value="Ivan Petrov"/>
+            <column name="email" value="ivan.petrov@mail.com"/>
+            <column name="phone" value="+375291234567"/>
+            <column name="car_plate_number" value="1234 AB-7"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+
+        <insert tableName="drivers">
+            <column name="name" value="Anton Smirnov"/>
+            <column name="email" value="anton.smirnov@mail.com"/>
+            <column name="phone" value="+375447654321"/>
+            <column name="car_plate_number" value="5678 CD-5"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
