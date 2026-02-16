@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/ratings")
+@RequestMapping("/api/ratings")
 @RequiredArgsConstructor
 public class RatingController {
 
@@ -33,7 +33,7 @@ public class RatingController {
         return response;
     }
 
-    @GetMapping("/trip/{tripId}")
+    @GetMapping("/{tripId}")
     public List<RatingResponseDto> getTripRatings(@PathVariable String tripId) {
         log.info("Received request to fetch ratings for tripId: {}", tripId);
 
