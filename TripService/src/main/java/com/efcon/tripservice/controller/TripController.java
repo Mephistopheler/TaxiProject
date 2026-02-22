@@ -1,6 +1,7 @@
 package com.efcon.tripservice.controller;
 
 
+import com.efcon.tripservice.client.dto.ExistenceResponseDto;
 import com.efcon.tripservice.dto.TripRequestDto;
 import com.efcon.tripservice.dto.TripResponseDto;
 import com.efcon.tripservice.dto.TripStatusUpdateRequest;
@@ -40,6 +41,14 @@ public class TripController {
         return tripService.getById(id);
 
     }
+
+    @GetMapping("/{id}/exists")
+    public ExistenceResponseDto existsById(@PathVariable String id) {
+
+        return new ExistenceResponseDto(tripService.existsById(id));
+
+    }
+
 
     @PutMapping("/{id}")
     public TripResponseDto update(@PathVariable String id, @RequestBody TripRequestDto requestDto ){

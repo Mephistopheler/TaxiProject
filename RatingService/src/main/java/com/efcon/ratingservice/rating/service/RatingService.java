@@ -5,6 +5,7 @@ import com.efcon.ratingservice.rating.dto.RatingResponseDto;
 import com.efcon.ratingservice.rating.mapper.RatingMapper;
 import com.efcon.ratingservice.rating.model.Rating;
 import com.efcon.ratingservice.rating.repository.RatingRepository;
+import com.efcon.ratingservice.rating.service.validation.RatingValidationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +21,16 @@ public class RatingService {
 
     private final RatingRepository ratingRepository;
     private final RatingMapper ratingMapper;
+    private final RatingValidationService ratingValidationService;
 
     public RatingResponseDto rateTrip(RatingRequestDto requestDto) {
 
+
+        ratingValidationService.validateReferences(
+                requestDto.getTripId(),
+                requestDto.getPassengerId(),
+                requestDto.getDriverId()
+        );
 
         // Маппим DTO в сущность
         Rating rating = ratingMapper.toEntity(requestDto);

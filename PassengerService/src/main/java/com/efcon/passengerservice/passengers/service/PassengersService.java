@@ -36,6 +36,11 @@ public class PassengersService {
         return passengersRepository.findByIdAndDeletedFalse(id);
     }
 
+    public boolean existsPassengerById(long id){
+        return passengersRepository.findByIdAndDeletedFalse(id).isPresent();
+    }
+
+
     public Optional<Passengers> updatePassenger(long id, Passengers updatedPassenger) {
         return passengersRepository.findByIdAndDeletedFalse(id)
                 .map(existingPassenger -> {

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.efcon.driverservice.grpc";
+option java_outer_classname = "DriverValidationProto";
+
+package driver.validation;
+
+service DriverValidationService {
+  rpc CheckDriverExists (DriverExistsRequest) returns (DriverExistsResponse);
+}
+
+message DriverExistsRequest {
+  int64 driver_id = 1;
+}
+
+message DriverExistsResponse {
+  bool exists = 1;
+}

@@ -70,4 +70,9 @@ public class DriverService {
         return car;
     }
 
+    public boolean existsById(Long id) {
+        return driverRepository.findByIdAndDeletedFalse(id).isPresent();
+    }
+
+
 }

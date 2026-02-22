@@ -20,10 +20,12 @@ public class TripService {
 
     private final TripRepository tripRepository;
     private final TripMapper tripMapper;
-
+    private final TripValidationService tripValidationService;
 
 
     public TripResponseDto create(TripRequestDto requestDto) {
+
+        tripValidationService.validateReferences(requestDto.getPassengerId(), requestDto.getDriverId());
 
         Trip trip = tripMapper.toEntity(requestDto);
         trip.setStatus(TripStatus.CREATED);
@@ -41,8 +43,15 @@ public class TripService {
 
     }
 
+    public boolean existsById(String id) {
+        return tripRepository.existsById(id);
+    }
+
+
     public TripResponseDto update(String id, TripRequestDto requestDto) {
 
+
+        tripValidationService.validateReferences(requestDto.getPassengerId(), requestDto.getDriverId());
         Trip trip = findTrip(id);
         trip.setDriverId(requestDto.getDriverId());
         trip.setPassengerId(requestDto.getPassengerId());

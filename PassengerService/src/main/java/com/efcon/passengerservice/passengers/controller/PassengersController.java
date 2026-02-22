@@ -1,6 +1,7 @@
 package com.efcon.passengerservice.passengers.controller;
 
 
+import com.efcon.passengerservice.passengers.dto.ExistenceResponseDto;
 import com.efcon.passengerservice.passengers.dto.PassengerDto;
 import com.efcon.passengerservice.passengers.model.Passengers;
 import com.efcon.passengerservice.passengers.service.PassengersService;
@@ -50,6 +51,12 @@ public class PassengersController {
         return passengersService.findPassengerById(id)
                 .map(passenger -> ResponseEntity.ok(toDto(passenger)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    public ResponseEntity<ExistenceResponseDto> existsById(@PathVariable long id){
+
+        return ResponseEntity.ok(new ExistenceResponseDto(passengersService.existsPassengerById(id)));
+
     }
 
     @PutMapping("/{id}")
