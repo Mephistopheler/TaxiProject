@@ -4,9 +4,13 @@ package com.efcon.tripservice.service;
 import com.efcon.tripservice.dto.TripRequestDto;
 import com.efcon.tripservice.dto.TripResponseDto;
 import com.efcon.tripservice.mapper.TripMapper;
+import com.efcon.tripservice.model.SagaStatus;
 import com.efcon.tripservice.model.Trip;
 import com.efcon.tripservice.model.TripStatus;
 import com.efcon.tripservice.repository.TripRepository;
+import com.efcon.tripservice.saga.SagaExecutionException;
+import com.efcon.tripservice.saga.SagaExecutor;
+import com.efcon.tripservice.saga.SagaStep;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,16 +25,30 @@ public class TripService {
     private final TripRepository tripRepository;
     private final TripMapper tripMapper;
     private final TripValidationService tripValidationService;
+    private final SagaExecutor sagaExecutor;
 
 
     public TripResponseDto create(TripRequestDto requestDto) {
 
-        tripValidationService.validateReferences(requestDto.getPassengerId(), requestDto.getDriverId());
 
         Trip trip = tripMapper.toEntity(requestDto);
         trip.setStatus(TripStatus.CREATED);
+        trip.setSagaStatus(SagaStatus.IN_PROGRESS);
         trip.setOrderDateTime(LocalDateTime.now());
-        return tripMapper.toDto(tripRepository.save(trip));
+        try {
+            sagaExecutor.execute("trip-create", List.of(
+                    validateReferencesStep(requestDto),
+                    persistTripStep(trip)
+            ));
+            trip.setSagaStatus(SagaStatus.COMPLETED);
+            trip.setSagaFailureReason(null);
+            return tripMapper.toDto(tripRepository.save(trip));
+        } catch (SagaExecutionException ex) {
+            trip.setSagaStatus(SagaStatus.FAILED);
+            trip.setStatus(TripStatus.CANCELED);
+            trip.setSagaFailureReason(ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage());
+            return tripMapper.toDto(tripRepository.save(trip));
+        }
     }
 
     public List<TripResponseDto> getAll() {
@@ -93,5 +111,24 @@ public class TripService {
     }
 
 
+    private SagaStep validateReferencesStep(TripRequestDto requestDto) {
+        return () -> tripValidationService.validateReferences(requestDto.getPassengerId(), requestDto.getDriverId());
+    }
+
+    private SagaStep persistTripStep(Trip trip) {
+        return new SagaStep() {
+            @Override
+            public void execute() {
+                tripRepository.save(trip);
+            }
+
+            @Override
+            public void compensate() {
+                if (trip.getId() != null) {
+                    tripRepository.deleteById(trip.getId());
+                }
+            }
+        };
+    }
 
 }

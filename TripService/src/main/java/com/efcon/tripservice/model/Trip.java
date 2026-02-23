@@ -24,6 +24,8 @@ public class Trip {
     private String pickupAddress;
     private String destinationAddress;
     private TripStatus status;
+    private SagaStatus sagaStatus;
+    private String sagaFailureReason;
     private LocalDateTime orderDateTime;
     private BigDecimal cost;
 }

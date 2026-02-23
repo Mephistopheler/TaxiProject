@@ -53,6 +53,7 @@ public class PassengersController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/{id}/exists")
     public ResponseEntity<ExistenceResponseDto> existsById(@PathVariable long id){
 
         return ResponseEntity.ok(new ExistenceResponseDto(passengersService.existsPassengerById(id)));
