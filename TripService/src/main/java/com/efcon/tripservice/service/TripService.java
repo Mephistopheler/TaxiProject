@@ -4,6 +4,8 @@ package com.efcon.tripservice.service;
 import com.efcon.tripservice.dto.TripRequestDto;
 import com.efcon.tripservice.dto.TripResponseDto;
 import com.efcon.tripservice.mapper.TripMapper;
+import com.efcon.tripservice.messaging.TripStatusChangedEvent;
+import com.efcon.tripservice.messaging.TripStatusEventProducer;
 import com.efcon.tripservice.model.SagaStatus;
 import com.efcon.tripservice.model.Trip;
 import com.efcon.tripservice.model.TripStatus;
@@ -11,7 +13,6 @@ import com.efcon.tripservice.repository.TripRepository;
 import com.efcon.tripservice.saga.SagaExecutionException;
 import com.efcon.tripservice.saga.SagaExecutor;
 import com.efcon.tripservice.saga.SagaStep;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class TripService {
     private final TripMapper tripMapper;
     private final TripValidationService tripValidationService;
     private final SagaExecutor sagaExecutor;
+    private final TripStatusEventProducer tripStatusEventProducer;
 
 
     public TripResponseDto create(TripRequestDto requestDto) {
@@ -91,7 +93,15 @@ public class TripService {
         Trip trip = findTrip(id);
         validateStatusTransition(trip.getStatus(), status);
         trip.setStatus(status);
-        return tripMapper.toDto(tripRepository.save(trip));
+        Trip savedTrip = tripRepository.save(trip);
+        tripStatusEventProducer.publish(new TripStatusChangedEvent(
+                savedTrip.getId(),
+                savedTrip.getPassengerId(),
+                savedTrip.getDriverId(),
+                savedTrip.getStatus(),
+                LocalDateTime.now()
+        ));
+        return tripMapper.toDto(savedTrip);
 
 
     }
