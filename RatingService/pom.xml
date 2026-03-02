@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.0</version>
+        <version>3.2.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.efcon</groupId>
@@ -29,13 +29,32 @@
     <properties>
         <java.version>21</java.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <spring-cloud.version>2025.1.0</spring-cloud.version>
+        <spring-cloud.version>2023.0.1</spring-cloud.version>
         <grpc.version>1.66.0</grpc.version>
         <protobuf.version>3.25.5</protobuf.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.15.1</version>  <!-- Выберите подходящую версию -->
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>2.15.1</version>  <!-- Выберите подходящую версию -->
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.15.1</version>  <!-- Выберите подходящую версию -->
+            </dependency>
+
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
@@ -51,7 +70,7 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
-            <version>3.0.0</version>
+            <version>3.1.0</version>
         </dependency>
 
         <dependency>
@@ -113,7 +132,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.24</version> <!-- Добавлена версия Lombok -->
+            <version>1.18.30</version> <!-- Добавлена версия Lombok -->
             <optional>true</optional>
         </dependency>
 
@@ -161,7 +180,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.24</version> <!-- Добавлена версия Lombok в аннотацию -->
+                            <version>1.18.30</version> <!-- Добавлена версия Lombok в аннотацию -->
                         </path>
 
                         <path>
@@ -180,6 +199,7 @@
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
+                            <version>1.18.30</version>
                         </exclude>
                     </excludes>
                 </configuration>
