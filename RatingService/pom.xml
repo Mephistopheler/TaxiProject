@@ -113,6 +113,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.24</version> <!-- Добавлена версия Lombok -->
             <optional>true</optional>
         </dependency>
 
@@ -160,6 +161,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
+                            <version>1.18.24</version> <!-- Добавлена версия Lombok в аннотацию -->
                         </path>
 
                         <path>
