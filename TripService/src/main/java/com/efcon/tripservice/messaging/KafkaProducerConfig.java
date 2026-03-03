@@ -25,7 +25,9 @@ public class KafkaProducerConfig {
         Map<String, Object> props = new HashMap<>(kafkaProperties.buildProducerProperties(sslBundles));
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        return new DefaultKafkaProducerFactory<>(props);
+        DefaultKafkaProducerFactory<String, TripStatusChangedEvent> factory = new DefaultKafkaProducerFactory<>(props);
+        factory.setTransactionIdPrefix("trip-status-tx-");
+        return factory;
     }
 
     @Bean

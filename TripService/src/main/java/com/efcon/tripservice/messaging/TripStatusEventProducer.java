@@ -15,6 +15,9 @@ public class TripStatusEventProducer {
     private String tripStatusTopic;
 
     public void publish(TripStatusChangedEvent event) {
-        kafkaTemplate.send(tripStatusTopic, event.tripId(), event);
+        kafkaTemplate.executeInTransaction(operations -> {
+            operations.send(tripStatusTopic, event.tripId(), event).join();
+            return null;
+        });
     }
 }

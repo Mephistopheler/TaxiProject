@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -95,6 +96,7 @@ public class TripService {
         trip.setStatus(status);
         Trip savedTrip = tripRepository.save(trip);
         tripStatusEventProducer.publish(new TripStatusChangedEvent(
+                UUID.randomUUID().toString(),
                 savedTrip.getId(),
                 savedTrip.getPassengerId(),
                 savedTrip.getDriverId(),
