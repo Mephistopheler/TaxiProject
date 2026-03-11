@@ -32,6 +32,7 @@ class PassengersRepositoryIntegrationTest {
     void findByIdAndDeletedFalse_returnsSavedPassenger() {
         Passengers p = new Passengers();
         p.setName("Name");
+        p.setEmail("name@example.com");
         p.setDeleted(false);
         Passengers saved = passengersRepository.save(p);
         assertTrue(passengersRepository.findByIdAndDeletedFalse(saved.getId()).isPresent());
