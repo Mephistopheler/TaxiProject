@@ -3,6 +3,7 @@ package com.efcon.tripservice.integration;
 import com.efcon.tripservice.grpc.DriverExistsResponse;
 import com.efcon.tripservice.grpc.DriverValidationServiceGrpc;
 import com.efcon.tripservice.service.TripValidationService;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 class TripValidationServiceWireMockIntegrationTest {
 
     @RegisterExtension
-    static WireMockExtension wireMock = WireMockExtension.newInstance().options(options().dynamicPort()).build();
+    static WireMockExtension wireMock = WireMockExtension.newInstance().options(WireMockConfiguration.wireMockConfig().dynamicPort()).build();
 
     @DynamicPropertySource
     static void props(DynamicPropertyRegistry registry) {
