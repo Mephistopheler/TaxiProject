@@ -114,4 +114,48 @@ class TripServiceTest {
         verify(tripRepository).save(argThat(updatedTrip -> updatedTrip.getStatus() == TripStatus.ACCEPTED));
         verify(tripStatusEventProducer).publish(any());
     }
+    @Test
+    void update_rejectsEditingCompletedTrip() {
+        TripRequestDto req = new TripRequestDto();
+        req.setDriverId(10L);
+        req.setPassengerId(20L);
+        req.setPickupAddress("A");
+        req.setDestinationAddress("B");
+        req.setCost(BigDecimal.ONE);
+
+        Trip trip = new Trip();
+        trip.setId("trip-1");
+        trip.setStatus(TripStatus.COMPLETED);
+        when(tripRepository.findById("trip-1")).thenReturn(Optional.of(trip));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> tripService.update("trip-1", req));
+
+        assertEquals("Trip is not editable in status: COMPLETED", exception.getMessage());
+        verify(tripValidationService, never()).validateReferences(any(), any());
+        verify(tripRepository, never()).save(any());
+    }
+
+    @Test
+    void update_rejectsEditingCanceledTrip() {
+        TripRequestDto req = new TripRequestDto();
+        req.setDriverId(10L);
+        req.setPassengerId(20L);
+        req.setPickupAddress("A");
+        req.setDestinationAddress("B");
+        req.setCost(BigDecimal.ONE);
+
+        Trip trip = new Trip();
+        trip.setId("trip-1");
+        trip.setStatus(TripStatus.CANCELED);
+        when(tripRepository.findById("trip-1")).thenReturn(Optional.of(trip));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> tripService.update("trip-1", req));
+
+        assertEquals("Trip is not editable in status: CANCELED", exception.getMessage());
+        verify(tripValidationService, never()).validateReferences(any(), any());
+        verify(tripRepository, never()).save(any());
+    }
+
 }

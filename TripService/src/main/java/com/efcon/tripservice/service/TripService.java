@@ -86,8 +86,10 @@ public class TripService {
     public TripResponseDto update(String id, TripRequestDto requestDto) {
 
 
-        tripValidationService.validateReferences(requestDto.getPassengerId(), requestDto.getDriverId());
+
         Trip trip = findTrip(id);
+        validateTripIsEditable(trip.getStatus());
+        tripValidationService.validateReferences(requestDto.getPassengerId(), requestDto.getDriverId());
         trip.setDriverId(requestDto.getDriverId());
         trip.setPassengerId(requestDto.getPassengerId());
         trip.setPickupAddress(requestDto.getPickupAddress());
@@ -126,6 +128,13 @@ public class TripService {
         return tripRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Trip not found: " + id));
     }
+
+    private void validateTripIsEditable(TripStatus status) {
+        if (status == TripStatus.COMPLETED || status == TripStatus.CANCELED) {
+            throw new IllegalStateException("Trip is not editable in status: " + status);
+        }
+    }
+
 
     private void validateStatusTransition(TripStatus current, TripStatus target) {
         if (current == target) {
