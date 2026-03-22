@@ -17,12 +17,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class TripService {
+
+    private static final Map<TripStatus, Set<TripStatus>> ALLOWED_STATUS_TRANSITIONS = new EnumMap<>(TripStatus.class);
+
+    static {
+        ALLOWED_STATUS_TRANSITIONS.put(TripStatus.CREATED,
+                EnumSet.of(TripStatus.ACCEPTED, TripStatus.CANCELED));
+        ALLOWED_STATUS_TRANSITIONS.put(TripStatus.ACCEPTED,
+                EnumSet.of(TripStatus.ON_THE_WAY_TO_PASSENGER, TripStatus.CANCELED));
+        ALLOWED_STATUS_TRANSITIONS.put(TripStatus.ON_THE_WAY_TO_PASSENGER,
+                EnumSet.of(TripStatus.ON_THE_WAY_TO_DESTINATION, TripStatus.CANCELED));
+        ALLOWED_STATUS_TRANSITIONS.put(TripStatus.ON_THE_WAY_TO_DESTINATION,
+                EnumSet.of(TripStatus.COMPLETED, TripStatus.CANCELED));
+        ALLOWED_STATUS_TRANSITIONS.put(TripStatus.COMPLETED, EnumSet.noneOf(TripStatus.class));
+        ALLOWED_STATUS_TRANSITIONS.put(TripStatus.CANCELED, EnumSet.noneOf(TripStatus.class));
+    }
 
     private final TripRepository tripRepository;
     private final TripMapper tripMapper;
@@ -114,11 +128,14 @@ public class TripService {
     }
 
     private void validateStatusTransition(TripStatus current, TripStatus target) {
-        if (current == TripStatus.COMPLETED || current == TripStatus.CANCELED) {
-            throw new IllegalStateException("Cannot change terminal status");
+        if (current == target) {
+            return;
         }
-        if (current == TripStatus.CREATED && target == TripStatus.ON_THE_WAY_TO_DESTINATION) {
-            throw new IllegalStateException("Invalid status transition");
+        Set<TripStatus> allowedTargets = ALLOWED_STATUS_TRANSITIONS.getOrDefault(current, EnumSet.noneOf(TripStatus.class));
+        if (!allowedTargets.contains(target)) {
+            throw new IllegalStateException(
+                    "Invalid status transition: " + current + " -> " + target
+            );
         }
     }
 
