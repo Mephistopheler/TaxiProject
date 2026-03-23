@@ -20,12 +20,8 @@ public class DriverController {
 
     @PostMapping
     public ResponseEntity<DriverDto> createDriver(@RequestBody DriverDto driverDto) {
-        try {
-            Driver savedDriver = driverService.createDriver(toEntity(driverDto), driverDto.getCarPlateNumber());
-            return new ResponseEntity<>(toDto(savedDriver), HttpStatus.CREATED);
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().build();
-        }
+        Driver savedDriver = driverService.createDriver(toEntity(driverDto), driverDto.getCarPlateNumber());
+        return new ResponseEntity<>(toDto(savedDriver), HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -47,13 +43,9 @@ public class DriverController {
 
     @PutMapping("/{id}")
     public ResponseEntity<DriverDto> updateDriver(@PathVariable Long id, @RequestBody DriverDto driverDto) {
-        try {
-            return driverService.updateDriver(id, toEntity(driverDto), driverDto.getCarPlateNumber())
-                    .map(driver -> ResponseEntity.ok(toDto(driver)))
-                    .orElseGet(() -> ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().build();
-        }
+        return driverService.updateDriver(id, toEntity(driverDto), driverDto.getCarPlateNumber())
+                .map(driver -> ResponseEntity.ok(toDto(driver)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

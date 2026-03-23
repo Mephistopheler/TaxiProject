@@ -39,4 +39,14 @@ class PassengersControllerTest {
                         .content("{\"name\":\"A\",\"email\":\"a@a.com\",\"phone\":\"1\"}"))
                 .andExpect(status().isCreated());
     }
+    @Test
+    void create_returnsBadRequestWhenServiceThrowsIllegalArgument() throws Exception {
+        when(passengersService.savePassenger(any())).thenThrow(new IllegalArgumentException("invalid passenger"));
+
+        mockMvc.perform(post("/api/passengers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"A\",\"email\":\"a@a.com\",\"phone\":\"1\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("invalid passenger"));
+    }
 }

@@ -24,8 +24,6 @@ class DriverControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     private DriverService driverService;
@@ -49,6 +47,18 @@ class DriverControllerTest {
         mockMvc.perform(post("/api/drivers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Ivan\",\"carPlateNumber\":\"bad\"}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("bad"));
+    }
+
+    @Test
+    void update_returnsConflictWhenServiceThrowsIllegalState() throws Exception {
+        when(driverService.updateDriver(eq(1L), any(), any())).thenThrow(new IllegalStateException("conflict"));
+
+        mockMvc.perform(put("/api/drivers/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Ivan\",\"carPlateNumber\":\"1234 AB-7\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("conflict"));
     }
 }

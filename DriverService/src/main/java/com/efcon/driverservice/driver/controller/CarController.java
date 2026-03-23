@@ -21,12 +21,8 @@ public class CarController {
 
     @PostMapping
     public ResponseEntity<CarDto> createCar(@RequestBody CarDto carDto) {
-        try {
-            Car savedCar = carService.createCar(toEntity(carDto));
-            return new ResponseEntity<>(toDto(savedCar), HttpStatus.CREATED);
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().build();
-        }
+        Car savedCar = carService.createCar(toEntity(carDto));
+        return new ResponseEntity<>(toDto(savedCar), HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -48,13 +44,9 @@ public class CarController {
 
     @PutMapping("/{plateNumber}")
     public ResponseEntity<CarDto> updateCar(@PathVariable String plateNumber, @RequestBody CarDto carDto) {
-        try {
-            return carService.updateCar(plateNumber, toEntity(carDto))
-                    .map(car -> ResponseEntity.ok(toDto(car)))
-                    .orElseGet(() -> ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().build();
-        }
+        return carService.updateCar(plateNumber, toEntity(carDto))
+                .map(car -> ResponseEntity.ok(toDto(car)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{plateNumber}")
