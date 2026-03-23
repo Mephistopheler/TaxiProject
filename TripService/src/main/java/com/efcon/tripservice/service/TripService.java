@@ -6,6 +6,7 @@ import com.efcon.tripservice.dto.TripResponseDto;
 import com.efcon.tripservice.mapper.TripMapper;
 import com.efcon.tripservice.messaging.TripStatusChangedEvent;
 import com.efcon.tripservice.messaging.TripStatusEventProducer;
+import com.efcon.tripservice.model.PendingTripStatusEvent;
 import com.efcon.tripservice.model.SagaStatus;
 import com.efcon.tripservice.model.Trip;
 import com.efcon.tripservice.model.TripStatus;
@@ -42,7 +43,7 @@ public class TripService {
     private final TripMapper tripMapper;
     private final TripValidationService tripValidationService;
     private final SagaExecutor sagaExecutor;
-    private final TripStatusEventProducer tripStatusEventProducer;
+    private final TripStatusPublicationService tripStatusPublicationService;
 
 
     public TripResponseDto create(TripRequestDto requestDto) {
@@ -109,17 +110,23 @@ public class TripService {
 
         Trip trip = findTrip(id);
         validateStatusTransition(trip.getStatus(), status);
-        trip.setStatus(status);
-        Trip savedTrip = tripRepository.save(trip);
-        tripStatusEventProducer.publish(new TripStatusChangedEvent(
-                UUID.randomUUID().toString(),
-                savedTrip.getId(),
-                savedTrip.getPassengerId(),
-                savedTrip.getDriverId(),
-                savedTrip.getStatus(),
-                LocalDateTime.now()
-        ));
-        return tripMapper.toDto(savedTrip);
+        if (trip.getStatus() != status) {
+            trip.setStatus(status);
+            trip.setPendingStatusEvent(PendingTripStatusEvent.forStatus(status));
+            trip = tripRepository.save(trip);
+        }
+
+        if (hasPendingEventForStatus(trip, status)) {
+            tripStatusPublicationService.publishPendingEventOrThrow(trip);
+            trip = findTrip(id);
+        }
+
+        return tripMapper.toDto(trip);
+
+
+    }
+    private boolean hasPendingEventForStatus(Trip trip, TripStatus status) {
+        return trip.getPendingStatusEvent() != null && trip.getPendingStatusEvent().getStatus() == status;
 
 
     }

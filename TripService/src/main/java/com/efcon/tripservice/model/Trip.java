@@ -28,4 +28,5 @@ public class Trip {
     private String sagaFailureReason;
     private LocalDateTime orderDateTime;
     private BigDecimal cost;
+    private PendingTripStatusEvent pendingStatusEvent;
 }
