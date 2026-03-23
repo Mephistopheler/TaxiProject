@@ -4,6 +4,7 @@ import com.efcon.tripservice.dto.TripRequestDto;
 import com.efcon.tripservice.dto.TripResponseDto;
 import com.efcon.tripservice.mapper.TripMapper;
 import com.efcon.tripservice.messaging.TripStatusEventProducer;
+import com.efcon.tripservice.model.PendingTripStatusEvent;
 import com.efcon.tripservice.model.Trip;
 import com.efcon.tripservice.model.TripStatus;
 import com.efcon.tripservice.repository.TripRepository;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -28,7 +30,7 @@ class TripServiceTest {
     @Mock TripMapper tripMapper;
     @Mock TripValidationService tripValidationService;
     @Mock SagaExecutor sagaExecutor;
-    @Mock TripStatusEventProducer tripStatusEventProducer;
+    @Mock TripStatusPublicationService tripStatusPublicationService;
     @InjectMocks TripService tripService;
 
     @Test
@@ -47,7 +49,7 @@ class TripServiceTest {
         verify(sagaExecutor).execute(any(), any());
     }
     @Test
-    void updateStatus_allowsOnlyConfiguredForwardTransition() {
+    void updateStatus_savesPendingEventForForwardTransition() {
         Trip trip = new Trip();
         trip.setId("trip-1");
         trip.setStatus(TripStatus.CREATED);
@@ -56,15 +58,16 @@ class TripServiceTest {
         savedTrip.setStatus(TripStatus.ACCEPTED);
         TripResponseDto responseDto = new TripResponseDto();
 
-        when(tripRepository.findById("trip-1")).thenReturn(Optional.of(trip));
+        when(tripRepository.findById("trip-1")).thenReturn(Optional.of(trip), Optional.of(savedTrip));
         when(tripRepository.save(any(Trip.class))).thenReturn(savedTrip);
         when(tripMapper.toDto(savedTrip)).thenReturn(responseDto);
 
         TripResponseDto result = tripService.updateStatus("trip-1", TripStatus.ACCEPTED);
 
         assertEquals(responseDto, result);
-        verify(tripRepository).save(argThat(updatedTrip -> updatedTrip.getStatus() == TripStatus.ACCEPTED));
-        verify(tripStatusEventProducer).publish(any());
+        verify(tripRepository).save(argThat(updatedTrip -> updatedTrip.getStatus() == TripStatus.ACCEPTED
+                && updatedTrip.getPendingStatusEvent() != null));
+        verify(tripStatusPublicationService).publishPendingEventOrThrow(savedTrip);
     }
 
     @Test
@@ -79,7 +82,7 @@ class TripServiceTest {
 
         assertEquals("Invalid status transition: CREATED -> COMPLETED", exception.getMessage());
         verify(tripRepository, never()).save(any());
-        verify(tripStatusEventProducer, never()).publish(any());
+        verify(tripStatusPublicationService, never()).publishPendingEventOrThrow(any());
     }
 
     @Test
@@ -94,25 +97,64 @@ class TripServiceTest {
 
         assertEquals("Invalid status transition: COMPLETED -> CANCELED", exception.getMessage());
         verify(tripRepository, never()).save(any());
-        verify(tripStatusEventProducer, never()).publish(any());
+        verify(tripStatusPublicationService, never()).publishPendingEventOrThrow(any());
     }
 
     @Test
-    void updateStatus_allowsIdempotentUpdate() {
+    void updateStatus_allowsIdempotentUpdateWithoutPendingEvent() {
         Trip trip = new Trip();
         trip.setId("trip-1");
         trip.setStatus(TripStatus.ACCEPTED);
         TripResponseDto responseDto = new TripResponseDto();
 
         when(tripRepository.findById("trip-1")).thenReturn(Optional.of(trip));
-        when(tripRepository.save(any(Trip.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(tripMapper.toDto(any(Trip.class))).thenReturn(responseDto);
+        when(tripMapper.toDto(trip)).thenReturn(responseDto);
 
         TripResponseDto result = tripService.updateStatus("trip-1", TripStatus.ACCEPTED);
 
         assertEquals(responseDto, result);
-        verify(tripRepository).save(argThat(updatedTrip -> updatedTrip.getStatus() == TripStatus.ACCEPTED));
-        verify(tripStatusEventProducer).publish(any());
+        verify(tripRepository, never()).save(any(Trip.class));
+        verify(tripStatusPublicationService, never()).publishPendingEventOrThrow(any());
+    }
+
+    @Test
+    void updateStatus_retriesPendingEventForSameStatus() {
+        Trip trip = new Trip();
+        trip.setId("trip-1");
+        trip.setStatus(TripStatus.COMPLETED);
+        trip.setPendingStatusEvent(PendingTripStatusEvent.forStatus(TripStatus.COMPLETED));
+        TripResponseDto responseDto = new TripResponseDto();
+
+        when(tripRepository.findById("trip-1")).thenReturn(Optional.of(trip), Optional.of(trip));
+        when(tripMapper.toDto(trip)).thenReturn(responseDto);
+
+        TripResponseDto result = tripService.updateStatus("trip-1", TripStatus.COMPLETED);
+
+        assertEquals(responseDto, result);
+        verify(tripRepository, never()).save(any(Trip.class));
+        verify(tripStatusPublicationService).publishPendingEventOrThrow(trip);
+    }
+
+    @Test
+    void updateStatus_keepsPendingEventWhenPublishFails() {
+        Trip trip = new Trip();
+        trip.setId("trip-1");
+        trip.setStatus(TripStatus.CREATED);
+
+        when(tripRepository.findById("trip-1")).thenReturn(Optional.of(trip));
+        when(tripRepository.save(any(Trip.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new RuntimeException("kafka down")).when(tripStatusPublicationService).publishPendingEventOrThrow(any());
+
+        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class,
+                () -> tripService.updateStatus("trip-1", TripStatus.ACCEPTED));
+
+        assertEquals("kafka down", exception.getMessage());
+        verify(tripRepository).save(argThat(updatedTrip -> {
+            assertEquals(TripStatus.ACCEPTED, updatedTrip.getStatus());
+            assertNotNull(updatedTrip.getPendingStatusEvent());
+            assertEquals(TripStatus.ACCEPTED, updatedTrip.getPendingStatusEvent().getStatus());
+            return true;
+        }));
     }
     @Test
     void update_rejectsEditingCompletedTrip() {
