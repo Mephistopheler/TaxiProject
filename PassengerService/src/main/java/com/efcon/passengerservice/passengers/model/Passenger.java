@@ -7,7 +7,7 @@ import lombok.Data;
 @Entity
 @Table(name = "passengers")
 @Data
-public class Passengers {
+public class Passenger {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,15 +27,15 @@ public class Passengers {
 
 
 
-    public Passengers() {
+    public Passenger() {
     }
 
-    public Passengers(String name, String email) {
+    public Passenger(String name, String email) {
         this.name = name;
         this.email=email;
     }
 
-    public Passengers(String name, String email, String phone) {
+    public Passenger(String name, String email, String phone) {
         this.name = name;
         this.email = email;
         this.phone = phone;

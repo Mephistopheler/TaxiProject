@@ -1,15 +1,11 @@
 package com.efcon.passengerservice.e2e;
 
-import com.efcon.passengerservice.passengers.model.Passengers;
+import com.efcon.passengerservice.passengers.model.Passenger;
 import com.efcon.passengerservice.passengers.service.PassengersService;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -28,7 +24,7 @@ public class PassengerE2ESteps {
     @Given("passenger with id {long} exists")
     public void passengerWithIdExists(long id) {
         when(passengersService.existsPassengerById(id)).thenReturn(true);
-        Passengers p = new Passengers(); p.setId(id);
+        Passenger p = new Passenger(); p.setId(id);
         when(passengersService.findPassengerById(id)).thenReturn(Optional.of(p));
     }
 

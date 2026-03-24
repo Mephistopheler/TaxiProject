@@ -1,6 +1,6 @@
 package com.efcon.passengerservice.passengers.repository;
 
-import com.efcon.passengerservice.passengers.model.Passengers;
+import com.efcon.passengerservice.passengers.model.Passenger;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PassengersRepository extends JpaRepository<Passengers, Long> {
+public interface PassengersRepository extends JpaRepository<Passenger, Long> {
 
-    Optional<Passengers> findByEmailAndDeletedFalse(String email);
+    Optional<Passenger> findByEmailAndDeletedFalse(String email);
 
-    Optional<Passengers> findByIdAndDeletedFalse(Long id);
+    Optional<Passenger> findByIdAndDeletedFalse(Long id);
 
-    List<Passengers> findAllByDeletedFalse();
+    List<Passenger> findAllByDeletedFalse();
 
 }

@@ -3,7 +3,7 @@ package com.efcon.passengerservice.passengers.controller;
 
 import com.efcon.passengerservice.passengers.dto.ExistenceResponseDto;
 import com.efcon.passengerservice.passengers.dto.PassengerDto;
-import com.efcon.passengerservice.passengers.model.Passengers;
+import com.efcon.passengerservice.passengers.model.Passenger;
 import com.efcon.passengerservice.passengers.service.PassengersService;
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +30,7 @@ public class PassengersController {
     @PostMapping
     public ResponseEntity<PassengerDto> createPassenger(@RequestBody PassengerDto passengerDto){
 
-        Passengers savedPassenger = passengersService.savePassenger(toEntity(passengerDto));
+        Passenger savedPassenger = passengersService.savePassenger(toEntity(passengerDto));
         return new ResponseEntity<>(toDto(savedPassenger), HttpStatus.CREATED);
 
 
@@ -80,8 +80,8 @@ public class PassengersController {
     }
 
 
-    private Passengers toEntity(PassengerDto passengerDto) {
-        Passengers passenger = new Passengers();
+    private Passenger toEntity(PassengerDto passengerDto) {
+        Passenger passenger = new Passenger();
         passenger.setId(passengerDto.getId());
         passenger.setName(passengerDto.getName());
         passenger.setEmail(passengerDto.getEmail());
@@ -89,7 +89,7 @@ public class PassengersController {
         return passenger;
     }
 
-    private PassengerDto toDto(Passengers passenger) {
+    private PassengerDto toDto(Passenger passenger) {
         PassengerDto passengerDto = new PassengerDto();
         passengerDto.setId(passenger.getId());
         passengerDto.setName(passenger.getName());

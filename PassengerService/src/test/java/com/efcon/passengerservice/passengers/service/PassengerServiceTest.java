@@ -1,6 +1,6 @@
 package com.efcon.passengerservice.passengers.service;
 
-import com.efcon.passengerservice.passengers.model.Passengers;
+import com.efcon.passengerservice.passengers.model.Passenger;
 import com.efcon.passengerservice.passengers.repository.PassengersRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,21 +14,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PassengersServiceTest {
+class PassengerServiceTest {
     @Mock PassengersRepository passengersRepository;
     @InjectMocks PassengersService passengersService;
 
     @Test
     void savePassenger_marksNotDeleted() {
-        Passengers p = new Passengers();
+        Passenger p = new Passenger();
         when(passengersRepository.save(p)).thenReturn(p);
-        Passengers saved = passengersService.savePassenger(p);
+        Passenger saved = passengersService.savePassenger(p);
         assertFalse(saved.isDeleted());
     }
 
     @Test
     void updatePassenger_returnsEmptyWhenNotFound() {
         when(passengersRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.empty());
-        assertTrue(passengersService.updatePassenger(1L, new Passengers()).isEmpty());
+        assertTrue(passengersService.updatePassenger(1L, new Passenger()).isEmpty());
     }
 }

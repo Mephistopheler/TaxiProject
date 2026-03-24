@@ -1,6 +1,6 @@
 package com.efcon.passengerservice.passengers.service;
 
-import com.efcon.passengerservice.passengers.model.Passengers;
+import com.efcon.passengerservice.passengers.model.Passenger;
 import com.efcon.passengerservice.passengers.repository.PassengersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,20 +17,20 @@ public class PassengersService {
 
 
 
-    public Passengers savePassenger(Passengers passengers){
+    public Passenger savePassenger(Passenger passenger){
 
-        passengers.setDeleted(false);
-        return passengersRepository.save(passengers);
+        passenger.setDeleted(false);
+        return passengersRepository.save(passenger);
 
     };
 
-    public List<Passengers> findAllPassengers(){
+    public List<Passenger> findAllPassengers(){
 
         return passengersRepository.findAllByDeletedFalse();
 
     };
 
-    public Optional<Passengers> findPassengerById(long id) {
+    public Optional<Passenger> findPassengerById(long id) {
 
 
         return passengersRepository.findByIdAndDeletedFalse(id);
@@ -41,7 +41,7 @@ public class PassengersService {
     }
 
 
-    public Optional<Passengers> updatePassenger(long id, Passengers updatedPassenger) {
+    public Optional<Passenger> updatePassenger(long id, Passenger updatedPassenger) {
         return passengersRepository.findByIdAndDeletedFalse(id)
                 .map(existingPassenger -> {
                     existingPassenger.setName(updatedPassenger.getName());
