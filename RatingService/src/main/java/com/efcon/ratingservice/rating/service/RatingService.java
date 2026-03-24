@@ -50,7 +50,7 @@ public class RatingService {
     public List<RatingResponseDto> getByTrip(String tripId) {
 
 
-        List<Rating> ratings = ratingRepository.findByTripId(tripId);
+        List<Rating> ratings = ratingRepository.findAllByTripId(tripId);
 
         List<RatingResponseDto> responseDtos = ratings.stream()
                 .map(ratingMapper::toDto)

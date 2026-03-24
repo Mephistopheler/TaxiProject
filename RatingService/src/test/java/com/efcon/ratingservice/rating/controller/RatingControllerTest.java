@@ -10,6 +10,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,6 +42,19 @@ class RatingControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Trip not found"));
     }
+
+    @Test
+    void getTripRatings_returnsRatingsForTrip() throws Exception {
+        RatingResponseDto rating = new RatingResponseDto();
+        rating.setTripId("trip-1");
+
+        when(ratingService.getByTrip("trip-1")).thenReturn(List.of(rating));
+
+        mockMvc.perform(get("/api/ratings/trip-1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].tripId").value("trip-1"));
+    }
+
 
     @Test
     void rateTrip_returnsConflictWhenTripStateIsInvalid() throws Exception {

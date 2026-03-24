@@ -13,9 +13,5 @@ import java.util.stream.StreamSupport;
 @Repository
 @EnableRedisRepositories
 public interface RatingRepository extends CrudRepository<Rating, String> {
-    default List<Rating> findByTripId(String tripId) {
-        return StreamSupport.stream(findAll().spliterator(), false)
-                .filter(rating -> Objects.equals(rating.getTripId(), tripId))
-                .toList();
-    }
+    List<Rating> findAllByTripId(String tripId);
 }

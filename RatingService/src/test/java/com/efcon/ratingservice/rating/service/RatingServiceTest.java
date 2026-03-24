@@ -12,20 +12,28 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RatingServiceTest {
-    @Mock RatingRepository ratingRepository;
-    @Mock RatingMapper ratingMapper;
-    @Mock RatingValidationService ratingValidationService;
-    @InjectMocks RatingService ratingService;
+    @Mock
+    RatingRepository ratingRepository;
+    @Mock
+    RatingMapper ratingMapper;
+    @Mock
+    RatingValidationService ratingValidationService;
+    @InjectMocks
+    RatingService ratingService;
 
     @Test
     void rateTrip_validatesAndSaves() {
         RatingRequestDto req = new RatingRequestDto();
-        req.setTripId("t1"); req.setPassengerId(1L); req.setDriverId(2L);
+        req.setTripId("t1");
+        req.setPassengerId(1L);
+        req.setDriverId(2L);
         Rating rating = new Rating();
         RatingResponseDto response = new RatingResponseDto();
         when(ratingMapper.toEntity(req)).thenReturn(rating);
@@ -36,5 +44,23 @@ class RatingServiceTest {
 
         assertEquals(response, result);
         verify(ratingValidationService).validateReferences("t1", 1L, 2L);
+    }
+
+    @Test
+    void getByTrip_returnsMappedDtos() {
+        Rating rating = new Rating();
+        rating.setTripId("t1");
+
+        RatingResponseDto dto = new RatingResponseDto();
+        dto.setTripId("t1");
+
+        when(ratingRepository.findAllByTripId("t1")).thenReturn(List.of(rating));
+        when(ratingMapper.toDto(rating)).thenReturn(dto);
+
+        List<RatingResponseDto> result = ratingService.getByTrip("t1");
+
+        assertEquals(1, result.size());
+        assertEquals("t1", result.get(0).getTripId());
+        verify(ratingRepository).findAllByTripId("t1");
     }
 }
