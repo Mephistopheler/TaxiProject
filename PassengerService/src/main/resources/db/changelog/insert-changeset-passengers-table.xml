@@ -7,8 +7,8 @@
 
        
 
-        <changeSet id="insert-into-passenger" author="Ivan">
-        <insert tableName="passenger">
+        <changeSet id="insert-into-passengers" author="Ivan">
+        <insert tableName="passengers">
                 <column name="name" value="Ivan"/>
                 <column name="email" value="example@gmail.com"/>
                 <column name="phone" value="+1111111111"/>

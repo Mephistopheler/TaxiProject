@@ -1,6 +1,6 @@
 package com.efcon.passengerservice.passengers.repository;
 
-import com.efcon.passengerservice.passengers.model.Passenger;
+import com.efcon.passengerservice.passengers.model.Passengers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
-class PassengerRepositoryIntegrationTest {
+class PassengersRepositoryIntegrationTest {
     @Container static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
     @DynamicPropertySource
@@ -30,11 +30,11 @@ class PassengerRepositoryIntegrationTest {
 
     @Test
     void findByIdAndDeletedFalse_returnsSavedPassenger() {
-        Passenger p = new Passenger();
+        Passengers p = new Passengers();
         p.setName("Name");
         p.setEmail("name@example.com");
         p.setDeleted(false);
-        Passenger saved = passengersRepository.save(p);
+        Passengers saved = passengersRepository.save(p);
         assertTrue(passengersRepository.findByIdAndDeletedFalse(saved.getId()).isPresent());
     }
 }
