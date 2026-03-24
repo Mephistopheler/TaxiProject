@@ -5,6 +5,7 @@ import com.efcon.passengerservice.passengers.dto.ExistenceResponseDto;
 import com.efcon.passengerservice.passengers.dto.PassengerDto;
 import com.efcon.passengerservice.passengers.model.Passengers;
 import com.efcon.passengerservice.passengers.service.PassengersService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class PassengersController {
 
 
     @PostMapping
-    public ResponseEntity<PassengerDto> createPassenger(@RequestBody PassengerDto passengerDto){
+    public ResponseEntity<PassengerDto> createPassenger(@Valid @RequestBody PassengerDto passengerDto){
 
         Passengers savedPassenger = passengersService.savePassenger(toEntity(passengerDto));
         return new ResponseEntity<>(toDto(savedPassenger), HttpStatus.CREATED);
@@ -63,7 +64,7 @@ public class PassengersController {
     @PutMapping("/{id}")
     public ResponseEntity<PassengerDto> updatePassenger(
             @PathVariable long id,
-            @RequestBody PassengerDto passengerDto
+            @Valid @RequestBody PassengerDto passengerDto
     ) {
         return passengersService.updatePassenger(id, toEntity(passengerDto))
                 .map(passenger -> ResponseEntity.ok(toDto(passenger)))

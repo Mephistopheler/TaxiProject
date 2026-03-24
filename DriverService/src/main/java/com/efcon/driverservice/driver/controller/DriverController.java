@@ -3,6 +3,7 @@ package com.efcon.driverservice.driver.controller;
 import com.efcon.driverservice.driver.dto.DriverDto;
 import com.efcon.driverservice.driver.model.Driver;
 import com.efcon.driverservice.driver.service.DriverService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class DriverController {
     private final DriverService driverService;
 
     @PostMapping
-    public ResponseEntity<DriverDto> createDriver(@RequestBody DriverDto driverDto) {
+    public ResponseEntity<DriverDto> createDriver(@Valid @RequestBody DriverDto driverDto) {
         Driver savedDriver = driverService.createDriver(toEntity(driverDto), driverDto.getCarPlateNumber());
         return new ResponseEntity<>(toDto(savedDriver), HttpStatus.CREATED);
     }
@@ -42,7 +43,7 @@ public class DriverController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DriverDto> updateDriver(@PathVariable Long id, @RequestBody DriverDto driverDto) {
+    public ResponseEntity<DriverDto> updateDriver(@PathVariable Long id, @Valid @RequestBody DriverDto driverDto) {
         return driverService.updateDriver(id, toEntity(driverDto), driverDto.getCarPlateNumber())
                 .map(driver -> ResponseEntity.ok(toDto(driver)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
